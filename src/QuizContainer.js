@@ -1,8 +1,8 @@
-import React, { Component } from "react";
+import React, { Component, PureComponent } from "react";
 import Clock from "./Clock";
 import DefinitionsList from "./DefinitionsList"
 
-class QuizContainer extends Component {
+class QuizContainer extends PureComponent {
 
     state = {
         definitions: [],
@@ -31,15 +31,20 @@ class QuizContainer extends Component {
 
     handleClick = (e) => {
         if (e.target.innerText === "Start Quiz") {
-            this.setState({hasStarted: true})
-            e.target.innerText = "Submit Quiz"
+            if (this.state.hasStarted === false) {
+                this.setState(prevState => {
+                    return {hasStarted: !prevState.hasStarted}
+                }, () => console.log(this.state))
+                e.target.innerText = "Submit Quiz"
+            } 
         } else if (e.target.innerText === "Submit Quiz") {
-            this.handleQuizComplete()
+                this.handleQuizComplete()
         }
+        // debugger
     }
 
     handleQuizComplete() {
-
+        debugger
     }
 
     formatDefinitionsList = () => {
@@ -49,12 +54,17 @@ class QuizContainer extends Component {
         })
     }
 
+    handleTimeOut = () => {
+        this.setState({hasStarted: false})
+        document.querySelector("#quiz-button").innerText = "Start Quiz"
+    }
+
     render(){
         return(
             <div>
-                <Clock hasStarted={this.state.hasStarted} />
+                <Clock handleTimeOut={this.handleTimeOut} hasStarted={this.state.hasStarted} />
                 {this.state.hasStarted && <DefinitionsList definitions={this.formatDefinitionsList()} />}
-                <button onClick={this.handleClick}>Start Quiz</button>
+                <button id="quiz-button" onClick={this.handleClick}>Start Quiz</button>
             </div>
         )
     }
