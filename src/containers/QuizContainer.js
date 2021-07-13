@@ -1,12 +1,15 @@
 import React, { Component, PureComponent } from "react";
 import Clock from "./Clock";
-import DefinitionsList from "./DefinitionsList"
+import "./QuizContainer.css";
+import DefinitionsList from "../components/DefinitionsList"
 
 class QuizContainer extends PureComponent {
 
     state = {
         definitions: [],
-        hasStarted: false
+        hasStarted: false,
+        quizCompleted: false,
+        score: 0
     }
 
     componentDidMount() {
@@ -32,19 +35,40 @@ class QuizContainer extends PureComponent {
     handleClick = (e) => {
         if (e.target.innerText === "Start Quiz") {
             if (this.state.hasStarted === false) {
-                this.setState(prevState => {
-                    return {hasStarted: !prevState.hasStarted}
-                }, () => console.log(this.state))
+                this.setState({hasStarted: true, quizCompleted: false, score: 0})
                 e.target.innerText = "Submit Quiz"
             } 
         } else if (e.target.innerText === "Submit Quiz") {
-                this.handleQuizComplete()
+                this.handleQuizComplete(e)
         }
         // debugger
     }
 
-    handleQuizComplete() {
-        debugger
+    findDefinitionAnswerByID(id) {
+        return this.state.definitions.find(def => def.id === parseInt(id))
+    }
+
+    handleQuizComplete(e) {
+        const score = this.calculateScore()
+        this.setState({score, quizCompleted: true, hasStarted: false})
+        e.target.innerText = "Start Quiz"
+    }
+
+    calculateScore() {
+        let score = 0
+        const inputs = document.querySelectorAll(".definition input")
+        for (let input of inputs) {
+            const id = input.id.split("-")[1]
+            const def = this.findDefinitionAnswerByID(id)
+            if (input.value.toLowerCase() === def.spell_name.toLowerCase()) {
+                score += 10
+            } else if (input.value === "") {
+                score += 0
+            } else {
+                score -= 5
+            }
+        }
+        return score;
     }
 
     formatDefinitionsList = () => {
@@ -61,8 +85,9 @@ class QuizContainer extends PureComponent {
 
     render(){
         return(
-            <div>
-                <Clock handleTimeOut={this.handleTimeOut} hasStarted={this.state.hasStarted} />
+            <div className="space-y-2">
+                {this.state.hasStarted && <Clock handleTimeOut={this.handleTimeOut} hasStarted={this.state.hasStarted} />}
+                {this.state.quizCompleted && <h3>Your score is: {this.state.score}</h3>}
                 {this.state.hasStarted && <DefinitionsList definitions={this.formatDefinitionsList()} />}
                 <button id="quiz-button" onClick={this.handleClick}>Start Quiz</button>
             </div>

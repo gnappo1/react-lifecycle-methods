@@ -1,6 +1,6 @@
-import logo from './logo.svg';
 import './App.css';
-import QuizContainer from "./QuizContainer"
+import {BrowserRouter as Router, Route, Switch} from 'react-router-dom'
+import QuizContainer from "../containers/QuizContainer"
 
 function App() {
   return (
