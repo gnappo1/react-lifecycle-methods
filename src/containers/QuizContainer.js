@@ -41,7 +41,6 @@ class QuizContainer extends PureComponent {
         } else if (e.target.innerText === "Submit Quiz") {
                 this.handleQuizComplete(e)
         }
-        // debugger
     }
 
     findDefinitionAnswerByID(id) {
@@ -51,7 +50,6 @@ class QuizContainer extends PureComponent {
     handleQuizComplete(e) {
         const score = this.calculateScore()
         this.setState({score, quizCompleted: true, hasStarted: false})
-        e.target.innerText = "Start Quiz"
     }
 
     calculateScore() {
@@ -80,7 +78,10 @@ class QuizContainer extends PureComponent {
 
     handleTimeOut = () => {
         this.setState({hasStarted: false})
-        document.querySelector("#quiz-button").innerText = "Start Quiz"
+    }
+
+    formatButtonTitle() {
+        return !!this.state.hasStarted ? "Submit Quiz" : "Start Quiz"
     }
 
     render(){
@@ -89,7 +90,7 @@ class QuizContainer extends PureComponent {
                 {this.state.hasStarted && <Clock handleTimeOut={this.handleTimeOut} hasStarted={this.state.hasStarted} />}
                 {this.state.quizCompleted && <h3>Your score is: {this.state.score}</h3>}
                 {this.state.hasStarted && <DefinitionsList definitions={this.formatDefinitionsList()} />}
-                <button id="quiz-button" onClick={this.handleClick}>Start Quiz</button>
+                <button id="quiz-button" onClick={this.handleClick}>{this.formatButtonTitle()}</button>
             </div>
         )
     }
