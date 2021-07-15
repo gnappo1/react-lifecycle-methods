@@ -1,31 +1,35 @@
-import React, { Component, PureComponent } from "react";
+// import React, { Component, PureComponent } from "react";
+import {useState, useEffect} from 'react'
 import Clock from "./Clock";
 import "./QuizContainer.css";
 import DefinitionsList from "../components/DefinitionsList"
 
 
-class QuizContainer extends PureComponent {
-
-    state = {
-        definitions: [],
-        hasStarted: false,
-        quizCompleted: false,
-        score: 0
-    }
-
-    componentDidMount() {
-        fetch("http://localhost:3000/spells_by_letter")
-        .then(resp => resp.json())
-        .then(json => {
-            this.setState({
-                definitions: Object.values(json).flat()
-            }, () => {
-                console.log("State was updated", this.state)
-            })
+const QuizContainer = (props)=> {
+    const [definitions, setDefinitions] = useState([])
+    const [hasStarted, setHasStarted] = useState(false)
+    const [quizCompleted, setQuizCompleted] = useState(false)
+    const [score, setScore] = useState(0)
+    
+    const formatDefinitionsList = (array) => {
+        const definitions = shuffleArray(array).slice(0, 7)
+        return definitions.map(def => {
+            return {id: def.id, description: def.description}
         })
     }
 
-    shuffleArray(array) {
+    useEffect(
+        () => {
+            const fetchSpells = () => {
+                fetch("http://localhost:3000/spells_by_letter")
+                .then(resp => resp.json())
+                .then(json => setDefinitions(Object.values(json).flat()))
+            }
+            fetchSpells()
+        }, []
+    )
+
+    const shuffleArray = (array) => {
         for (let i = array.length - 1; i > 0; i--) {
             const j = Math.floor(Math.random() * (i + 1));
             [array[i], array[j]] = [array[j], array[i]];
@@ -33,32 +37,33 @@ class QuizContainer extends PureComponent {
         return array
     }
 
-    handleClick = (e) => {
-        if (e.target.innerText === "Start Quiz") {
-            if (this.state.hasStarted === false) {
-                this.setState({hasStarted: true, quizCompleted: false, score: 0})
-                e.target.innerText = "Submit Quiz"
-            } 
-        } else if (e.target.innerText === "Submit Quiz") {
-                this.handleQuizComplete(e)
+    const handleClick = (e) => {
+        if (!hasStarted) {
+            setHasStarted(true) 
+            setQuizCompleted(false) 
+            setScore(0)
+        } else {
+            handleQuizComplete(e)
         }
     }
 
-    findDefinitionAnswerByID(id) {
-        return this.state.definitions.find(def => def.id === parseInt(id))
+    const findDefinitionAnswerByID = (id) => {
+        return definitions.find(def => def.id === parseInt(id))
     }
 
-    handleQuizComplete(e) {
-        const score = this.calculateScore()
-        this.setState({score, quizCompleted: true, hasStarted: false})
+    const handleQuizComplete = (e) => {
+        const score = calculateScore()
+        setScore(score)
+        setQuizCompleted(true)
+        setHasStarted(false)
     }
 
-    calculateScore() {
+    const calculateScore = () => {
         let score = 0
         const inputs = document.querySelectorAll(".definition input")
         for (let input of inputs) {
             const id = input.id.split("-")[1]
-            const def = this.findDefinitionAnswerByID(id)
+            const def = findDefinitionAnswerByID(id)
             if (input.value.toLowerCase() === def.spell_name.toLowerCase()) {
                 score += 10
             } else if (input.value === "") {
@@ -70,31 +75,22 @@ class QuizContainer extends PureComponent {
         return score;
     }
 
-    formatDefinitionsList = () => {
-        const definitions = this.shuffleArray(this.state.definitions).slice(0, 7)
-        return definitions.map(def => {
-            return {id: def.id, description: def.description}
-        })
+    const handleTimeOut = () => {
+        setHasStarted(false)
     }
 
-    handleTimeOut = () => {
-        this.setState({hasStarted: false})
+    const formatButtonTitle = () => {
+        return !!hasStarted ? "Submit Quiz" : "Start Quiz"
     }
 
-    formatButtonTitle() {
-        return !!this.state.hasStarted ? "Submit Quiz" : "Start Quiz"
-    }
-
-    render(){
-        return(
-            <div className="space-y-2">
-                {this.state.hasStarted && <Clock handleTimeOut={this.handleTimeOut} hasStarted={this.state.hasStarted} />}
-                {this.state.quizCompleted && <h3>Your score is: {this.state.score}</h3>}
-                {this.state.hasStarted && <DefinitionsList definitions={this.formatDefinitionsList()} />}
-                <button id="quiz-button" onClick={this.handleClick}>{this.formatButtonTitle()}</button>
-            </div>
-        )
-    }
+    return(
+        <div className="space-y-2">
+            {hasStarted && <Clock handleTimeOut={handleTimeOut} hasStarted={hasStarted} />}
+            {quizCompleted && <h3>Your score is: {score}</h3>}
+            {hasStarted && <DefinitionsList definitions={formatDefinitionsList(definitions)} />}
+            <button id="quiz-button" onClick={handleClick}>{formatButtonTitle()}</button>
+        </div>
+    )
 }
 
 export default QuizContainer;
