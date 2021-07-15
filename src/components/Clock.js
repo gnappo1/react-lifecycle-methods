@@ -16,7 +16,7 @@ const Clock = ({hasStarted, handleTimeOut}) => {
             setTimer()
             return () => {
                 console.log("unmounting!")
-                clearInterval(timerId)
+                if (timerId) {clearInterval(timerId)}
                 if (timeLeft === 0) {
                     setTimeLeft(20)
                     handleTimeOut()
