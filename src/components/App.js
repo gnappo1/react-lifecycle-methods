@@ -1,6 +1,6 @@
 import './App.css';
 import {BrowserRouter as Router, Route, Switch} from 'react-router-dom'
-import QuizContainer from "../containers/QuizContainer"
+import QuizContainer from "./QuizContainer"
 import Navbar from "./Navbar"
 import Home from "./Home"
 import About from "./About"

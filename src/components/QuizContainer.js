@@ -2,7 +2,7 @@
 import {useState, useEffect} from 'react'
 import Clock from "./Clock";
 import "./QuizContainer.css";
-import DefinitionsList from "../components/DefinitionsList"
+import DefinitionsList from "./DefinitionsList"
 
 
 const QuizContainer = (props)=> {
