@@ -3,6 +3,7 @@ import Clock from "./Clock";
 import "./QuizContainer.css";
 import DefinitionsList from "../components/DefinitionsList"
 
+
 class QuizContainer extends PureComponent {
 
     state = {
